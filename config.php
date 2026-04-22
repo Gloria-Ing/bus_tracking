@@ -7,13 +7,14 @@ date_default_timezone_set('Africa/Kigali');
 
 try {
 
-    // 🚀 USE RAILWAY ENV VARIABLES (RELIABLE METHOD)
-    $host = $_ENV["MYSQLHOST"];
-    $port = $_ENV["MYSQLPORT"];
-    $db   = $_ENV["MYSQLDATABASE"];
-    $user = $_ENV["MYSQLUSER"];
-    $pass = $_ENV["MYSQLPASSWORD"];
+    // 🚀 USE getenv() ONLY (MOST RELIABLE ON RAILWAY)
+    $host = getenv("MYSQLHOST");
+    $port = getenv("MYSQLPORT");
+    $db   = getenv("MYSQLDATABASE");
+    $user = getenv("MYSQLUSER");
+    $pass = getenv("MYSQLPASSWORD");
 
+    // 🔍 DEBUG CHECK (VERY IMPORTANT)
     if (!$host || !$user || !$db) {
         die("Missing database environment variables in Railway");
     }
@@ -28,35 +29,5 @@ try {
 
 } catch (PDOException $e) {
     die("Database connection failed");
-}
-
-// ---------------- HELPERS ----------------
-
-function isAdminLoggedIn() {
-    return isset($_SESSION['admin_id']);
-}
-
-function redirectIfNotLoggedIn() {
-    if (!isAdminLoggedIn()) {
-        header("Location: login.php");
-        exit();
-    }
-}
-
-function getAdminName() {
-    return $_SESSION['admin_name'] ?? 'Admin';
-}
-
-function logSystemEvent($conn, $card_uid, $bus_number, $message) {
-    $stmt = $conn->prepare("
-        INSERT INTO system_logs (card_uid, bus_number, message)
-        VALUES (:card_uid, :bus_number, :message)
-    ");
-
-    $stmt->execute([
-        ':card_uid' => $card_uid,
-        ':bus_number' => $bus_number,
-        ':message' => $message
-    ]);
 }
 ?>
