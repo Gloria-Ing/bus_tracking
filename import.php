@@ -7,12 +7,16 @@ require_once "config.php";
 $sql = file_get_contents("bus_tracking.sql");
 
 if (!$sql) {
-    die("SQL file not found or empty");
+    die("❌ SQL file not found or empty");
 }
 
-if ($conn->multi_query($sql)) {
+try {
+    // PDO can run multiple SQL statements
+    $conn->exec($sql);
+
     echo "✅ Database imported successfully";
-} else {
-    echo "❌ Error importing database: " . $conn->error;
+
+} catch (PDOException $e) {
+    echo "❌ Import failed: " . $e->getMessage();
 }
 ?>
