@@ -3,15 +3,16 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-date_default_timezone_set('Asia/Kigali');
+// ✅ FIXED timezone (Asia/Kigali is invalid)
+date_default_timezone_set('Africa/Kigali');
 
 try {
-    // Railway MySQL credentials (your values)
-    $host = "mysql.railway.internal";
-    $port = 3306;
-    $db   = "railway";
-    $user = "root";
-    $pass = "vMogoenptaWFqwxVKxxCrhobvXlBAaUi";
+    // 🚨 IMPORTANT: Use Railway environment variables (NOT hardcoded values)
+    $host = getenv("MYSQLHOST") ?: "mysql.railway.internal";
+    $port = getenv("MYSQLPORT") ?: 3306;
+    $db   = getenv("MYSQLDATABASE") ?: "railway";
+    $user = getenv("MYSQLUSER") ?: "root";
+    $pass = getenv("MYSQLPASSWORD") ?: "vMogoenptaWFqwxVKxxCrhobvXlBAaUi";
 
     $conn = new PDO(
         "mysql:host=$host;port=$port;dbname=$db;charset=utf8",
@@ -22,7 +23,7 @@ try {
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 } catch (PDOException $e) {
-    // safer message (don’t expose DB error in production)
+    // ❌ safe error (do not expose DB details in production)
     die("Database connection failed");
 }
 
@@ -42,6 +43,8 @@ function redirectIfNotLoggedIn() {
 function getAdminName() {
     return $_SESSION['admin_name'] ?? 'Admin';
 }
+
+// ---------------- LOG SYSTEM EVENT ----------------
 
 function logSystemEvent($conn, $card_uid, $bus_number, $message) {
     $stmt = $conn->prepare("
