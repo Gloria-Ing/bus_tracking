@@ -7,27 +7,29 @@ date_default_timezone_set('Africa/Kigali');
 
 try {
 
-    // 🚀 USE getenv() ONLY (MOST RELIABLE ON RAILWAY)
+    // 🚀 USE ONLY getenv (Railway safe method)
     $host = getenv("MYSQLHOST");
     $port = getenv("MYSQLPORT");
     $db   = getenv("MYSQLDATABASE");
     $user = getenv("MYSQLUSER");
     $pass = getenv("MYSQLPASSWORD");
 
-    // 🔍 DEBUG CHECK (VERY IMPORTANT)
     if (!$host || !$user || !$db) {
-        die("Missing database environment variables in Railway");
+        die("Missing database environment variables");
     }
 
+    // 🔥 IMPORTANT CHANGE: force TCP connection
     $conn = new PDO(
         "mysql:host=$host;port=$port;dbname=$db;charset=utf8",
         $user,
-        $pass
+        $pass,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_TIMEOUT => 5
+        ]
     );
 
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
 } catch (PDOException $e) {
-    die("Database connection failed");
+    die("Database connection failed: " . $e->getMessage());
 }
 ?>
