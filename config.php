@@ -7,14 +7,17 @@ date_default_timezone_set('Africa/Kigali');
 
 try {
 
-    // ✅ Railway MySQL credentials
-    $host = "mysql.railway.internal";
-    $port = 3306;
-    $db   = "railway";
-    $user = "root";
-    $pass = "vMogoenptaWFqwxVKxxCrhobvXlBAaUi";
+    // 🚀 USE RAILWAY ENV VARIABLES (RELIABLE METHOD)
+    $host = $_ENV["MYSQLHOST"];
+    $port = $_ENV["MYSQLPORT"];
+    $db   = $_ENV["MYSQLDATABASE"];
+    $user = $_ENV["MYSQLUSER"];
+    $pass = $_ENV["MYSQLPASSWORD"];
 
-    // ✅ PDO connection (recommended for Railway)
+    if (!$host || !$user || !$db) {
+        die("Missing database environment variables in Railway");
+    }
+
     $conn = new PDO(
         "mysql:host=$host;port=$port;dbname=$db;charset=utf8",
         $user,
@@ -43,8 +46,6 @@ function redirectIfNotLoggedIn() {
 function getAdminName() {
     return $_SESSION['admin_name'] ?? 'Admin';
 }
-
-// ---------------- LOG FUNCTION ----------------
 
 function logSystemEvent($conn, $card_uid, $bus_number, $message) {
     $stmt = $conn->prepare("
