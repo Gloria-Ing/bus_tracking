@@ -1,15 +1,17 @@
 FROM php:8.2-apache
 
-# Install MySQL + PDO extensions
 RUN docker-php-ext-install pdo pdo_mysql mysqli
 
-# Enable Apache rewrite (optional but useful)
+# Enable rewrite
 RUN a2enmod rewrite
 
-# Copy project files into container
+# Copy project
 COPY . /var/www/html/
 
-# Set working directory
-WORKDIR /var/www/html
+# IMPORTANT: fix Apache port binding
+ENV PORT=80
+
+# Tell Apache to use Railway port
+RUN sed -i 's/80/${PORT}/g' /etc/apache2/ports.conf
 
 EXPOSE 80
