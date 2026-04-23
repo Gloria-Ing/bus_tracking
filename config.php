@@ -1,21 +1,24 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Use environment variables on Render, fallback to local defaults
 $host = getenv('DB_HOST') ?: 'localhost';
 $user = getenv('DB_USER') ?: 'root';
 $password = getenv('DB_PASSWORD') ?: '';
 $database = getenv('DB_NAME') ?: 'bus_tracking';
+$port = 4000; // TiDB Cloud port
 
-$conn = new mysqli($host, $user, $password, $database);
+// SSL connection for TiDB Cloud
+$conn = mysqli_init();
+mysqli_ssl_set($conn, NULL, NULL, NULL, NULL, NULL);
 
-if ($conn->connect_error) {
-    // Log error but don't expose details in production
+if (!$conn->real_connect($host, $user, $password, $database, $port, NULL, MYSQLI_CLIENT_SSL)) {
     error_log("Connection failed: " . $conn->connect_error);
     die("Database connection error. Please try again later.");
 }
 
-// Set timezone to Rwanda (East Africa Time)
 date_default_timezone_set('Africa/Kigali');
 
 function isAdminLoggedIn() {
