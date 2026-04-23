@@ -1,35 +1,38 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+session_start();
+
+$host = 'localhost';
+$user = 'root';
+$password = '';
+$database = 'bus_tracking';
+
+$conn = new mysqli($host, $user, $password, $database);
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-date_default_timezone_set('Africa/Kigali');
+date_default_timezone_set('Asia/Kolkata');
 
-try {
+function isAdminLoggedIn() {
+    return isset($_SESSION['admin_id']);
+}
 
-    // 🚀 USE ONLY getenv (Railway safe method)
-    $host = getenv("MYSQLHOST");
-    $port = getenv("MYSQLPORT");
-    $db   = getenv("MYSQLDATABASE");
-    $user = getenv("MYSQLUSER");
-    $pass = getenv("MYSQLPASSWORD");
-
-    if (!$host || !$user || !$db) {
-        die("Missing database environment variables");
+function redirectIfNotLoggedIn() {
+    if (!isAdminLoggedIn()) {
+        header("Location: login.php");
+        exit();
     }
+}
 
-    // 🔥 IMPORTANT CHANGE: force TCP connection
-    $conn = new PDO(
-        "mysql:host=$host;port=$port;dbname=$db;charset=utf8",
-        $user,
-        $pass,
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_TIMEOUT => 5
-        ]
-    );
+function getAdminName() {
+    return $_SESSION['admin_name'] ?? 'Admin';
+}
 
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+function logSystemEvent($conn, $card_uid, $bus_number, $message) {
+    $card_uid = $conn->real_escape_string($card_uid);
+    $bus_number = $conn->real_escape_string($bus_number);
+    $message = $conn->real_escape_string($message);
+    $conn->query("INSERT INTO system_logs (card_uid, bus_number, message) VALUES ('$card_uid', '$bus_number', '$message')");
 }
 ?>
