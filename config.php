@@ -3,19 +3,25 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Use environment variables on Render, fallback to local defaults
+// Read database credentials from environment variables
 $host = getenv('DB_HOST') ?: 'localhost';
 $user = getenv('DB_USER') ?: 'root';
 $password = getenv('DB_PASSWORD') ?: '';
 $database = getenv('DB_NAME') ?: 'bus_tracking';
 $port = 4000; // TiDB Cloud port
 
-// SSL connection for TiDB Cloud
+// Create connection with SSL for TiDB Cloud
 $conn = mysqli_init();
+if (!$conn) {
+    die("mysqli_init failed");
+}
+
+// Set SSL options
 mysqli_ssl_set($conn, NULL, NULL, NULL, NULL, NULL);
 
+// Connect to TiDB Cloud using environment variables
 if (!$conn->real_connect($host, $user, $password, $database, $port, NULL, MYSQLI_CLIENT_SSL)) {
-    error_log("Connection failed: " . $conn->connect_error);
+    error_log("Connection failed: " . mysqli_connect_error());
     die("Database connection error. Please try again later.");
 }
 
