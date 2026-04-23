@@ -1,18 +1,22 @@
 <?php
 session_start();
 
-$host = 'localhost';
-$user = 'root';
-$password = '';
-$database = 'bus_tracking';
+// Use environment variables on Render, fallback to local defaults
+$host = getenv('DB_HOST') ?: 'localhost';
+$user = getenv('DB_USER') ?: 'root';
+$password = getenv('DB_PASSWORD') ?: '';
+$database = getenv('DB_NAME') ?: 'bus_tracking';
 
 $conn = new mysqli($host, $user, $password, $database);
 
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    // Log error but don't expose details in production
+    error_log("Connection failed: " . $conn->connect_error);
+    die("Database connection error. Please try again later.");
 }
 
-date_default_timezone_set('Asia/Kolkata');
+// Set timezone to Rwanda (East Africa Time)
+date_default_timezone_set('Africa/Kigali');
 
 function isAdminLoggedIn() {
     return isset($_SESSION['admin_id']);
