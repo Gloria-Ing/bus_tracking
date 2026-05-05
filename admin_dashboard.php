@@ -302,7 +302,7 @@ $recent_transactions = $conn->query("
                     <tbody>
                         <?php while($trans = $recent_transactions->fetch_assoc()): ?>
                         <tr class="border-b">
-                            <td class="px-4 py-2"><?php echo date('H:i:s', strtotime($trans['transaction_time'])); ?></td>
+                            <td class="px-4 py-2"><?php echo date('Y-m-d H:i:s', strtotime($trans['transaction_time'])); ?></td>
                             <td class="px-4 py-2"><?php echo $trans['passenger_name']; ?></td>
                             <td class="px-4 py-2 font-mono text-sm"><?php echo $trans['card_uid']; ?></td>
                             <td class="px-4 py-2"><?php echo $trans['bus_number']; ?></td>
